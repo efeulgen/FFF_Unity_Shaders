@@ -1,6 +1,8 @@
 Shader "FFF/MixTextureShader"{
     Properties{
           _MainTex ("Main Texture", 2D) = "white" {}
+          _MainTexTiling ("Main Texture Tiling", Range(1, 10)) = 1
+          _MainTextureTint ("Main Texture Tint", Color) = (1, 1, 1, 1)
           _noise ("Noise", 2D) = "white" {}
           _dirtColor ("Dirt Color", Color) = (1, 0, 0, 1)
           _maskStrength ("Mask Strength", Range(1, 3)) = 1
@@ -19,6 +21,8 @@ Shader "FFF/MixTextureShader"{
         };
 
         sampler2D _MainTex;
+        float _MainTexTiling;
+        fixed4 _MainTextureTint;
         sampler2D _noise;
         fixed4 _dirtColor;
         float _maskStrength;
@@ -28,7 +32,7 @@ Shader "FFF/MixTextureShader"{
 
         void surf(Input IN, inout SurfaceOutput o)
         {
-            fixed4 mainColor = tex2D(_MainTex, IN.uv_MainTex);
+            fixed4 mainColor = (tex2D(_MainTex, IN.uv_MainTex * _MainTexTiling) + _MainTextureTint) / 2;
             fixed4 mask = tex2D(_noise, IN.uv_noise * _maskTiling + float2(_maskOffsetX, _maskOffsetY));
             fixed4 dirt = lerp(mainColor, _dirtColor, mask * _maskStrength);
             o.Albedo = dirt;
